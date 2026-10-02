@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventario de Entradas | Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- ENCABEZADO CON BOTÓN INICIO PANEL Y ACCIÓN -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="fa-solid fa-boxes-stacked me-2" style="color: #6f42c1;"></i>Inventario de Entradas</h2>
+            <p class="text-muted mb-0">Administra los sectores, precios y capacidad por concierto.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <!-- Botón de acceso directo al Inicio del Panel Administrador -->
+            <a href="{% url 'eventos_web:admin_inicio' %}" class="btn btn-outline-dark fw-bold">
+                <i class="fa-solid fa-gauge me-1"></i>Inicio Panel
+            </a>
+            <!-- Botón para abrir modal de agregar sectores/entradas -->
+            <button type="button" class="btn text-white fw-bold" style="background-color: #6f42c1;" data-bs-toggle="modal" data-bs-target="#modalAgregarSector">
+                <i class="fa-solid fa-plus me-1"></i>+ Agregar Sector / Entradas
+            </button>
+        </div>
+    </div>
+
+    <!-- MENSAJES DE ESTADO -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- FILTRO DE SELECCIÓN DE CONCIERTO -->
+    <div class="card border-0 shadow-sm p-3 mb-4 rounded-3">
+        <div class="d-flex align-items-center gap-3">
+            <label class="fw-bold mb-0 text-nowrap"><i class="fa-solid fa-filter me-2"></i>Seleccionar Concierto:</label>
+            <select id="selectConcierto" class="form-select border-primary fw-semibold" onchange="filtrarSectores()">
+                {% for evento in eventos %}
+                    <option value="evento_{{ evento.id }}">{{ evento.titulo }} ({{ evento.artista.nombre }})</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- TABLA DE SECTORES Y STOCK POR CONCIERTO -->
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sector</th>
+                            <th>Precio</th>
+                            <th>Stock Total</th>
+                            <th>Disponibles</th>
+                            <th>Estado</th>
+                            <th class="text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for evento in eventos %}
+                            {% for sector in evento.sectores.all %}
+                            <tr class="fila-sector evento_{{ evento.id }}">
+                                <td><strong class="text-dark">{{ sector.nombre_sector }}</strong></td>
+                                <td>${{ sector.precio }}</td>
+                                <td>{{ sector.capacidad }}</td>
+                                <td>
+                                    <span class="badge bg-primary fs-6">{{ sector.stock_disponible }}</span>
+                                </td>
+                                <td>
+                                    {% if sector.stock_disponible > 0 %}
+                                        <span class="badge bg-success">Disponible</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Agotado</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <!-- Botón Editar Stock -->
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalStock{{ sector.id }}">
+                                        Actualizar Stock
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- MODAL ACTUALIZAR STOCK -->
+                            <div class="modal fade" id="modalStock{{ sector.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0 shadow">
+                                        <div class="modal-header bg-light">
+                                            <h5 class="modal-title fw-bold">Actualizar Stock - {{ sector.nombre_sector }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form action="{% url 'eventos_web:admin_actualizar_stock' sector.id %}" method="POST">
+                                            {% csrf_token %}
+                                            <div class="modal-body p-4 text-start">
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-bold">Stock Disponible Actual</label>
+                                                    <input type="number" name="stock_disponible" class="form-control" value="{{ sector.stock_disponible }}" min="0" required>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer bg-light">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn text-white fw-bold" style="background-color: #6f42c1;">Guardar Stock</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <tr class="fila-sector evento_{{ evento.id }}">
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    Este concierto no tiene sectores ni entradas creadas. Usa el botón "+ Agregar Sector / Entradas".
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL AGREGAR SECTOR / ENTRADAS A CUALQUIER EVENTO -->
+<div class="modal fade" id="modalAgregarSector" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-plus-circle me-2" style="color: #6f42c1;"></i>Agregar Sector / Entradas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <!-- Apunta correctamente a la URL registrada en urls_web.py -->
+            <form id="formAgregarSector" method="POST" action="">
+                {% csrf_token %}
+                <div class="modal-body p-4 text-start">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Concierto / Evento</label>
+                        <select id="selectEventoModal" class="form-select" onchange="actualizarActionModal(this.value)" required>
+                            <option value="" disabled selected>Seleccionar concierto...</option>
+                            {% for evento in eventos %}
+                                <option value="{{ evento.id }}">{{ evento.titulo }} ({{ evento.artista.nombre }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nombre del Sector</label>
+                        <input type="text" name="nombre_sector" class="form-control" placeholder="Ej: Cancha, Cancha Baja, VIP, Platea" required>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Precio ($)</label>
+                            <input type="number" name="precio" class="form-control" placeholder="Ej: 250000" min="0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Capacidad Total</label>
+                            <input type="number" name="capacidad" class="form-control" placeholder="Ej: 500" min="1" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Stock Inicial Disponible</label>
+                        <input type="number" name="stock" class="form-control" placeholder="Ej: 500" min="0" required>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white fw-bold" style="background-color: #6f42c1;">Guardar Entradas</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPT DE FILTRADO Y RUTA CORRECTA AL ENDPOINT -->
+<script>
+function filtrarSectores() {
+    var seleccionado = document.getElementById("selectConcierto").value;
+    var filas = document.getElementsByClassName("fila-sector");
+    
+    for (var i = 0; i < filas.length; i++) {
+        if (filas[i].classList.contains(seleccionado)) {
+            filas[i].style.display = "";
+        } else {
+            filas[i].style.display = "none";
+        }
+    }
+}
+
+function actualizarActionModal(eventoId) {
+    var form = document.getElementById("formAgregarSector");
+    // Ruta exacta definida en las URLs de Django de tu proyecto
+    form.action = "/admin-panel/inventario/sector/crear/" + eventoId + "/";
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    filtrarSectores();
+    // Preseleccionar el primer evento disponible en el modal si existe
+    var selectModal = document.getElementById("selectEventoModal");
+    if (selectModal && selectModal.options.length > 1) {
+        selectModal.selectedIndex = 1;
+        actualizarActionModal(selectModal.value);
+    }
+});
+</script>
+{% endblock %}

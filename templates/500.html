@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Error de Servidor (500) | Venta de Entradas{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center text-center my-5 py-4">
+    <div class="col-md-8 col-lg-6">
+        <i class="fa-solid fa-server fa-5x text-secondary mb-4"></i>
+        <h1 class="display-4 fw-bold text-dark">500</h1>
+        <h3 class="fw-bold mb-3">Error Interno del Servidor</h3>
+        <p class="text-secondary mb-4">
+            Ocurrió un problema inesperado en el servidor. El equipo técnico ha sido notificado.
+        </p>
+        <a href="{% url 'eventos_web:index' %}" class="btn btn-purple fw-bold px-4 py-2">
+            <i class="fa-solid fa-house me-2"></i>Volver al Catálogo
+        </a>
+    </div>
+</div>
+{% endblock %}

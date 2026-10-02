@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Catálogo de Conciertos | Venta de Entradas{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- ENCABEZADO PRINCIPAL -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="display-5 fw-bold text-dark">Próximos Conciertos & Eventos</h1>
+            <p class="lead text-muted">Asegura tu lugar en los mejores espectáculos en vivo</p>
+        </div>
+    </div>
+
+    <!-- REJILLA DE CONCIERTOS -->
+    <div class="row g-4 justify-content-center">
+        {% for evento in eventos %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm rounded-3 overflow-hidden">
+                <!-- BANNER / IMAGEN DEL CONCIERTO (URL) -->
+                {% if evento.banner %}
+                    <img src="{{ evento.banner }}" class="card-img-top" alt="{{ evento.titulo }}" style="height: 200px; object-fit: cover;" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x200?text=Concierto';">
+                {% elif evento.imagen %}
+                    <img src="{{ evento.imagen }}" class="card-img-top" alt="{{ evento.titulo }}" style="height: 200px; object-fit: cover;" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x200?text=Concierto';">
+                {% else %}
+                    <div class="text-white text-center py-5" style="background-color: #6f42c1; height: 200px;">
+                        <i class="fa-solid fa-music fa-3x mb-2"></i>
+                        <h5 class="fw-bold px-3">{{ evento.titulo }}</h5>
+                    </div>
+                {% endif %}
+
+                <div class="card-body d-flex flex-column p-4">
+                    <!-- GÉNERO -->
+                    <div class="mb-2">
+                        <span class="badge" style="background-color: #6f42c1;">{{ evento.artista.genero|default:"Música" }}</span>
+                    </div>
+
+                    <h5 class="card-title fw-bold text-dark mb-2">{{ evento.titulo }}</h5>
+                    
+                    <p class="card-text text-muted small mb-1">
+                        <i class="fa-solid fa-microphone me-2 text-purple"></i><strong>Artista:</strong> {{ evento.artista.nombre }}
+                    </p>
+                    <p class="card-text text-muted small mb-1">
+                        <i class="fa-solid fa-location-dot me-2 text-purple"></i><strong>Recinto:</strong> {{ evento.recinto.nombre }} ({{ evento.recinto.ciudad }})
+                    </p>
+                    <p class="card-text text-muted small mb-3">
+                        <i class="fa-solid fa-calendar-days me-2 text-purple"></i><strong>Fecha:</strong> {{ evento.fecha_hora|date:"d \d\e F, Y - H:i" }} hrs
+                    </p>
+
+                    <!-- SECTORES Y LOCALIDADES -->
+                    <div class="mt-auto pt-3 border-top">
+                        <strong class="d-block text-dark small mb-2">Localidades / Sectores:</strong>
+                        
+                        {% if evento.sectores.all %}
+                            <ul class="list-unstyled mb-3">
+                                {% for sector in evento.sectores.all %}
+                                    <li class="small text-muted d-flex justify-content-between border-bottom py-1">
+                                        <span>{{ sector.nombre_sector }}</span>
+                                        <strong class="text-dark">${{ sector.precio|floatformat:0 }}</strong>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <!-- BOTÓN DE COMPRA ACTIVO -->
+                            <a href="{% url 'eventos_web:detalle_evento' evento.id %}" class="btn w-100 fw-bold text-white shadow-sm" style="background-color: #6f42c1; border: none;">
+                                <i class="fa-solid fa-ticket me-2"></i>Seleccionar Entradas
+                            </a>
+                        {% elif evento.sector_set.all %}
+                            <ul class="list-unstyled mb-3">
+                                {% for sector in evento.sector_set.all %}
+                                    <li class="small text-muted d-flex justify-content-between border-bottom py-1">
+                                        <span>{{ sector.nombre_sector }}</span>
+                                        <strong class="text-dark">${{ sector.precio|floatformat:0 }}</strong>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <!-- BOTÓN DE COMPRA ACTIVO -->
+                            <a href="{% url 'eventos_web:detalle_evento' evento.id %}" class="btn w-100 fw-bold text-white shadow-sm" style="background-color: #6f42c1; border: none;">
+                                <i class="fa-solid fa-ticket me-2"></i>Seleccionar Entradas
+                            </a>
+                        {% else %}
+                            <p class="text-muted small mb-3">No hay sectores configurados.</p>
+                            <!-- BOTÓN DESACTIVADO HASTA CREAR SECTOR -->
+                            <button class="btn btn-secondary w-100 fw-bold" disabled>
+                                <i class="fa-solid fa-ticket me-2"></i>Seleccionar Entradas
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="mb-3 text-muted">
+                <i class="fa-solid fa-calendar-xmark fa-4x"></i>
+            </div>
+            <h4 class="fw-bold text-secondary">No hay eventos disponibles en este momento.</h4>
+            <p class="text-muted">Vuelve a consultar más tarde para nuevas fechas y conciertos.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestión de Eventos | Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- ENCABEZADO Y NAVEGACIÓN DIRECTA -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="fa-solid fa-calendar-days me-2" style="color: #6f42c1;"></i>Gestión de Eventos</h2>
+            <p class="text-muted mb-0">Administra tus conciertos y artistas desde esta pantalla.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <!-- Botón de acceso directo al Inicio del Panel Administrador -->
+            <a href="{% url 'eventos_web:admin_inicio' %}" class="btn btn-outline-dark fw-bold">
+                <i class="fa-solid fa-gauge me-1"></i>Inicio Panel
+            </a>
+            <!-- Botón Crear Artista -->
+            <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-toggle="modal" data-bs-target="#modalCrearArtista">
+                <i class="fa-solid fa-user-plus me-1"></i>+ Crear Artista
+            </button>
+            <!-- Botón Nuevo Evento -->
+            <button type="button" class="btn text-white fw-bold" style="background-color: #6f42c1;" data-bs-toggle="modal" data-bs-target="#modalCrearEvento">
+                <i class="fa-solid fa-plus me-1"></i>+ Nuevo Evento
+            </button>
+        </div>
+    </div>
+
+    <!-- MENSAJES FEEDBACK -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- TABLA DE EVENTOS DE LA BASE DE DATOS -->
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden mb-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Título</th>
+                            <th>Artista</th>
+                            <th>Recinto</th>
+                            <th>Fecha y Hora</th>
+                            <th>Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for evento in eventos %}
+                        <tr>
+                            <td>
+                                <strong class="d-block text-dark">{{ evento.titulo }}</strong>
+                            </td>
+                            <td>{{ evento.artista.nombre }}</td>
+                            <td>{{ evento.recinto.nombre }}</td>
+                            <td>{{ evento.fecha_hora|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                {% if evento.estado == 'Activo' or evento.estado == 'activo' %}
+                                    <span class="badge bg-success">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ evento.estado }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <!-- Botón Editar Evento -->
+                                <button type="button" class="btn btn-sm btn-outline-primary me-1" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalEditarEvento{{ evento.id }}">
+                                    <i class="fa-solid fa-pen-to-square me-1"></i>Editar
+                                </button>
+                                <a href="{% url 'eventos_web:admin_inventario' %}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fa-solid fa-layer-group me-1"></i>Sectores
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- MODAL EDITAR EVENTO -->
+                        <div class="modal fade" id="modalEditarEvento{{ evento.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content border-0 shadow">
+                                    <div class="modal-header bg-light">
+                                        <h5 class="modal-title fw-bold">Editar Evento: {{ evento.titulo }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form action="{% url 'eventos_web:admin_editar_evento' evento.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <div class="modal-body p-4 text-start">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Título del Evento</label>
+                                                <input type="text" name="titulo" class="form-control" value="{{ evento.titulo }}" required>
+                                            </div>
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-bold">Artista</label>
+                                                    <select name="artista_id" class="form-select" required>
+                                                        {% for artista in artistas %}
+                                                            <option value="{{ artista.id }}" {% if artista.id == evento.artista.id %}selected{% endif %}>
+                                                                {{ artista.nombre }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-bold">Recinto</label>
+                                                    <select name="recinto_id" class="form-select" required>
+                                                        {% for recinto in recintos %}
+                                                            <option value="{{ recinto.id }}" {% if recinto.id == evento.recinto.id %}selected{% endif %}>
+                                                                {{ recinto.nombre }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="row g-3 mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-bold">Fecha y Hora</label>
+                                                    <input type="datetime-local" name="fecha_hora" class="form-control" value="{{ evento.fecha_hora|date:'Y-m-d\TH:i' }}" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-bold">Estado</label>
+                                                    <select name="estado" class="form-select">
+                                                        <option value="Activo" {% if evento.estado == 'Activo' or evento.estado == 'activo' %}selected{% endif %}>Activo</option>
+                                                        <option value="Inactivo" {% if evento.estado == 'Inactivo' %}selected{% endif %}>Inactivo</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">URL Imagen / Banner Completa</label>
+                                                <textarea name="banner" class="form-control" rows="2" placeholder="https://... (pega el enlace completo de la imagen)">{{ evento.banner|default:'' }}</textarea>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Descripción</label>
+                                                <textarea name="descripcion" class="form-control" rows="3">{{ evento.descripcion|default:'' }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer bg-light">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn text-white fw-bold" style="background-color: #6f42c1;">Guardar Cambios</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                No hay eventos registrados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CREAR EVENTO -->
+<div class="modal fade" id="modalCrearEvento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold">Crear Nuevo Evento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'eventos_web:admin_crear_evento' %}" method="POST">
+                {% csrf_token %}
+                <div class="modal-body p-4 text-start">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Título del Evento</label>
+                        <input type="text" name="titulo" class="form-control" placeholder="Ej: Mon Laferte Tour" required>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Artista</label>
+                            <select name="artista_id" class="form-select" required>
+                                <option value="" disabled selected>Seleccionar artista...</option>
+                                {% for artista in artistas %}
+                                    <option value="{{ artista.id }}">{{ artista.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Recinto</label>
+                            <select name="recinto_id" class="form-select" required>
+                                <option value="" disabled selected>Seleccionar recinto...</option>
+                                {% for recinto in recintos %}
+                                    <option value="{{ recinto.id }}">{{ recinto.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Fecha y Hora</label>
+                            <input type="datetime-local" name="fecha_hora" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Estado</label>
+                            <select name="estado" class="form-select">
+                                <option value="Activo" selected>Activo</option>
+                                <option value="Inactivo">Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">URL Imagen / Banner Completa</label>
+                        <textarea name="banner" class="form-control" rows="2" placeholder="https://... (pega el enlace completo de la imagen)"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descripción</label>
+                        <textarea name="descripcion" class="form-control" rows="3" placeholder="Descripción del evento..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white fw-bold" style="background-color: #6f42c1;">Guardar Evento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CREAR ARTISTA -->
+<div class="modal fade" id="modalCrearArtista" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-plus me-2" style="color: #6f42c1;"></i>Registrar Nuevo Artista</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'eventos_web:admin_crear_artista' %}" method="POST">
+                {% csrf_token %}
+                <div class="modal-body p-4 text-start">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nombre del Artista / Banda</label>
+                        <input type="text" name="nombre" class="form-control" placeholder="Ej: Mon Laferte, Stray Kids" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Género Musical</label>
+                        <input type="text" name="genero" class="form-control" value="Pop / Romántico" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">URL Imagen del Grupo / Artista Completa</label>
+                        <textarea name="imagen_url" class="form-control" rows="2" placeholder="https://... (pega el enlace completo de la imagen)"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white fw-bold" style="background-color: #6f42c1;">Guardar Artista</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

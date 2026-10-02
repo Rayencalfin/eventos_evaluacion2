@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Órdenes | Historial de Compras{% endblock %}
+
+{% block content %}
+<h2 class="fw-bold mb-4"><i class="fa-solid fa-receipt me-2" style="color: #6f42c1;"></i>Mis Órdenes / Historial de Compras</h2>
+
+{% for orden in ordenes %}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <div>
+            <strong class="me-2">Orden #{{ orden.id }}</strong>
+            <small class="text-muted">({{ orden.fecha_orden|date:"d/m/Y H:i" }})</small>
+        </div>
+        <span class="badge bg-success">PAGADO</span>
+    </div>
+    <div class="card-body">
+        <h6 class="fw-bold mb-2">Detalle de Productos:</h6>
+        <ul class="list-group list-group-flush mb-3">
+            {% for detalle in orden.detalleorden_set.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                <div>
+                    <strong>{{ detalle.sector.evento.titulo }}</strong> - {{ detalle.sector.nombre_sector }}
+                    <span class="text-muted small">({{ detalle.cantidad }} unidad/es x ${{ detalle.precio_unitario_historico }})</span>
+                </div>
+                <span class="fw-bold text-dark">${{ detalle.cantidad|add:0 }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+            <span class="fw-bold fs-5">Total Abonado:</span>
+            <span class="fw-bold fs-5 text-success">${{ orden.total }}</span>
+        </div>
+    </div>
+</div>
+{% empty %}
+<div class="text-center py-5">
+    <i class="fa-solid fa-receipt fa-4x text-muted mb-3"></i>
+    <h4 class="text-muted">No posees historial de compras registradas.</h4>
+    <a href="{% url 'eventos_web:index' %}" class="btn btn-purple mt-2">Ver Catálogo</a>
+</div>
+{% endfor %}
+{% endblock %}

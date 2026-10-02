@@ -1,0 +1,69 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Reportes | Panel Administrativo{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">Reportes de Ventas</h2>
+        <p class="text-secondary mb-0">Estadísticas e ingresos desagregados por sector.</p>
+    </div>
+</div>
+
+<!-- SELECTOR DE CONCIERTO -->
+<div class="card border-0 shadow-sm p-3 mb-4">
+    <form method="GET" class="row align-items-center">
+        <div class="col-auto">
+            <label class="fw-bold text-dark mb-0"><i class="fa-solid fa-filter me-2"></i>Filtrar por Concierto:</label>
+        </div>
+        <div class="col-md-5">
+            <select name="evento_id" class="form-select" onchange="this.form.submit()">
+                {% for ev in eventos %}
+                    <option value="{{ ev.id }}" {% if evento_seleccionado and evento_seleccionado.id == ev.id %}selected{% endif %}>
+                        {{ ev.titulo }} ({{ ev.artista.nombre }})
+                    </option>
+                {% empty %}
+                    <option value="">No hay conciertos disponibles</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+</div>
+
+<div class="card border-0 shadow-sm p-4">
+    <h5 class="fw-bold text-dark mb-3">Ventas por Sector</h5>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Sector</th>
+                    <th>Precio Unitario</th>
+                    <th>Stock Total</th>
+                    <th>Entradas Vendidas</th>
+                    <th>Disponibles</th>
+                    <th>Ingresos Estimados</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sector in sectores %}
+                <tr>
+                    <td><strong>{{ sector.nombre_sector }}</strong></td>
+                    <td>${{ sector.precio|floatformat:0 }}</td>
+                    <td>{{ sector.stock_total }}</td>
+                    <td><span class="badge bg-success fs-6">{{ sector.vendidas }}</span></td>
+                    <td>{{ sector.stock_disponible }}</td>
+                    <td class="fw-bold text-success">
+                        {% widthratio sector.vendidas 1 sector.precio as ingreso %}
+                        ${{ ingreso|floatformat:0 }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">Selecciona un concierto para consultar estadísticas.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

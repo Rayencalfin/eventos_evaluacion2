@@ -1,0 +1,40 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Crear Artista | Panel Administrativo{% endblock %}
+
+{% block admin_content %}
+<div class="mb-4">
+    <h2 class="fw-bold text-dark mb-1">Registrar Nuevo Artista</h2>
+    <p class="text-secondary mb-0">Agrega artistas a la base de datos para vincularlos a conciertos.</p>
+</div>
+
+<div class="card border-0 shadow-sm p-4" style="max-width: 600px;">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label fw-bold">Nombre del Artista / Banda</label>
+            <input type="text" name="nombre" class="form-control" placeholder="Ej: BLACKPINK" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Género Musical</label>
+            <input type="text" name="genero" class="form-control" placeholder="Ej: K-Pop, Rock, Pop" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">URL de la Foto</label>
+            <input type="url" name="imagen" class="form-control" placeholder="https://ejemplo.com/artista.jpg">
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label fw-bold">Biografía / Descripción</label>
+            <textarea name="biografia" class="form-control" rows="3" placeholder="Información del artista..."></textarea>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="{% url 'eventos_web:admin_evento' %}" class="btn btn-light">Cancelar</a>
+            <button type="submit" class="btn btn-primary fw-bold" style="background-color: #6f42c1; border: none;">Guardar Artista</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

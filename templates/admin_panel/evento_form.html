@@ -1,0 +1,72 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}{% if evento %}Editar Concierto{% else %}Crear Concierto{% endif %} | Panel Administrativo{% endblock %}
+
+{% block admin_content %}
+<div class="mb-4">
+    <h2 class="fw-bold text-dark mb-1">{% if evento %}Editar Concierto{% else %}Nuevo Concierto{% endif %}</h2>
+    <p class="text-secondary mb-0">Completa la información requerida para el evento.</p>
+</div>
+
+<div class="card border-0 shadow-sm p-4" style="max-width: 800px;">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label fw-bold">Título del Concierto</label>
+            <input type="text" name="titulo" class="form-control" value="{{ evento.titulo|default:'' }}" required placeholder="Ej: Stray Kids World Tour dominATE">
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Artista</label>
+                <select name="artista" class="form-select" required>
+                    <option value="">-- Seleccionar Artista --</option>
+                    {% for artista in artistas %}
+                        <option value="{{ artista.id }}" {% if evento and evento.artista.id == artista.id %}selected{% endif %}>{{ artista.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Recinto / Lugar</label>
+                <select name="recinto" class="form-select" required>
+                    <option value="">-- Seleccionar Recinto --</option>
+                    {% for recinto in recintos %}
+                        <option value="{{ recinto.id }}" {% if evento and evento.recinto.id == recinto.id %}selected{% endif %}>{{ recinto.nombre }} ({{ recinto.ciudad }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Fecha y Hora</label>
+                <input type="datetime-local" name="fecha_hora" class="form-control" value="{{ evento.fecha_hora|date:'Y-m-d\TH:i' }}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Estado</label>
+                <select name="estado" class="form-select">
+                    <option value="Activo" {% if evento and evento.estado == 'Activo' %}selected{% endif %}>Activo</option>
+                    <option value="Borrador" {% if evento and evento.estado == 'Borrador' %}selected{% endif %}>Borrador</option>
+                    <option value="Finalizado" {% if evento and evento.estado == 'Finalizado' %}selected{% endif %}>Finalizado</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">URL de la Imagen (Banner)</label>
+            <input type="url" name="imagen" class="form-control" value="{{ evento.banner|default:'' }}" placeholder="https://ejemplo.com/imagen.jpg">
+            <small class="text-muted">Copia y pega el enlace de la imagen desde Google.</small>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label fw-bold">Descripción</label>
+            <textarea name="descripcion" class="form-control" rows="4" placeholder="Detalles del concierto...">{{ evento.descripcion|default:'' }}</textarea>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="{% url 'eventos_web:admin_evento' %}" class="btn btn-light">Cancelar</a>
+            <button type="submit" class="btn btn-primary fw-bold" style="background-color: #6f42c1; border: none;">Guardar Concierto</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

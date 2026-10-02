@@ -1,0 +1,41 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Configuración | Panel Administrativo{% endblock %}
+
+{% block admin_content %}
+<div class="mb-4">
+    <h2 class="fw-bold text-dark mb-1">Configuración del Administrador</h2>
+    <p class="text-secondary mb-0">Información de la cuenta de usuario activa.</p>
+</div>
+
+<div class="card border-0 shadow-sm p-4" style="max-width: 600px;">
+    <div class="d-flex align-items-center mb-4">
+        <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 60px; height: 60px; font-size: 1.5rem; background-color: #6f42c1 !important;">
+            <i class="fa-solid fa-user-gear"></i>
+        </div>
+        <div>
+            <h5 class="fw-bold mb-0">{{ user.get_full_name|default:user.username }}</h5>
+            <span class="badge bg-primary">{{ user.rol }}</span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label text-muted fw-bold">Nombre de Usuario</label>
+        <input type="text" class="form-control bg-light" value="{{ user.username }}" readonly>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label text-muted fw-bold">Correo Electrónico</label>
+        <input type="email" class="form-control bg-light" value="{{ user.email }}" readonly>
+    </div>
+
+    <div class="mb-4">
+        <label class="form-label text-muted fw-bold">Fecha de Registro</label>
+        <input type="text" class="form-control bg-light" value="{{ user.date_joined|date:'d/m/Y H:i' }}" readonly>
+    </div>
+
+    <a href="{% url 'usuarios_web:logout' %}" class="btn btn-outline-danger fw-bold">
+        <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar Sesión
+    </a>
+</div>
+{% endblock %}

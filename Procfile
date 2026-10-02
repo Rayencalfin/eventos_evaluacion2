@@ -1,0 +1,1 @@
+web: gunicorn entradas_eventos.wsgi:application --log-file -

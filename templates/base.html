@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Venta de Entradas | Conciertos & Eventos{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f8f9fa; display: flex; flex-direction: column; min-height: 100vh; }
+        .content-wrapper { flex: 1; }
+        .navbar-brand { font-weight: bold; color: #6f42c1 !important; }
+        .btn-purple { background-color: #6f42c1; color: white; }
+        .btn-purple:hover { background-color: #59319d; color: white; }
+        footer { background-color: #212529; color: #adb5bd; padding: 20px 0; margin-top: auto; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- NAVBAR NAVEGACIÓN DINÁMICA -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'eventos_web:index' %}">
+                <i class="fa-solid fa-ticket me-2"></i>EntradasEventos
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'eventos_web:index' %}">Catálogo de Conciertos</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        {% if user.rol == 'Organizador' or user.is_staff %}
+                        <li class="nav-item">
+                            <a class="nav-link text-warning" href="{% url 'swagger-ui' %}">
+                                <i class="fa-solid fa-code me-1"></i>Documentación API
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        {% if user.rol == 'Espectador' %}
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="{% url 'carrito_web:ver_carro' %}">
+                                <i class="fa-solid fa-cart-shopping me-1"></i>Mi Carrito
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="{% url 'compras_web:mis_ordenes' %}">
+                                <i class="fa-solid fa-receipt me-1"></i>Mis Órdenes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="{% url 'compras_web:mis_entradas' %}">
+                                <i class="fa-solid fa-qrcode me-1"></i>Mis Entradas
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-light" href="javascript:void(0)" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-user-circle me-1"></i>{{ user.email }} ({{ user.rol }})
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <li>
+                                    <form action="{% url 'usuarios_web:logout' %}" method="POST" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item text-danger fw-semibold">
+                                            <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar Sesión
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="btn btn-outline-light btn-sm me-2 fw-semibold" href="{% url 'usuarios_web:login' %}">
+                                <i class="fa-solid fa-right-to-bracket me-1"></i>Iniciar Sesión
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-purple btn-sm fw-semibold" href="{% url 'usuarios_web:registro' %}">
+                                <i class="fa-solid fa-user-plus me-1"></i>Registrarse
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MENSAJES DE FLASH / NOTIFICACIONES -->
+    <div class="container mt-3">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="content-wrapper container my-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- FOOTER OFICIAL OBLIGATORIO -->
+    <footer class="text-center">
+        <div class="container">
+            <p class="mb-0">
+                Rayen Alejandra Calfin Melivilu – Sección AP_N4_C1 – Año 2026
+            </p>
+            <small class="text-muted d-block mt-1">Plataforma Backend para Venta de Entradas (Caso Stray Kids)</small>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

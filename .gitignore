@@ -1,0 +1,27 @@
+# Entorno Virtual Python
+venv/
+env/
+ENV/
+
+# Archivos de configuración con credenciales (NUNCA subir a GitHub)
+.env
+
+# Archivos compilados y temporales de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Bases de datos SQLite accidentales (en nuestro proyecto usamos PostgreSQL)
+*.sqlite3
+db.sqlite3
+
+# Archivos multimedia cargados por usuarios y estáticos colectados
+media/
+staticfiles/
+
+# Configuraciones de editores e IDEs
+.vscode/
+.idea/
+*.swp
+.DS_Store

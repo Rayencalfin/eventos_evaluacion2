@@ -1,0 +1,47 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Ventas y Órdenes | Panel Administrativo{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">Ventas y Órdenes</h2>
+        <p class="text-secondary mb-0">Listado histórico de compras y estado de las órdenes.</p>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>N° Orden</th>
+                    <th>Cliente</th>
+                    <th>Fecha</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for orden in ordenes %}
+                <tr>
+                    <td><strong>#{{ orden.id }}</strong></td>
+                    <td>{{ orden.usuario.get_full_name|default:orden.usuario.username }} ({{ orden.usuario.email }})</td>
+                    <td>{{ orden.fecha_orden|date:"d/m/Y H:i" }}</td>
+                    <td>${{ orden.total|floatformat:0 }}</td>
+                    <td>
+                        <span class="badge {% if orden.estado == 'PAGADA' %}bg-success{% elif orden.estado == 'PENDIENTE' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                            {{ orden.estado }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">No se registran órdenes en la plataforma.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

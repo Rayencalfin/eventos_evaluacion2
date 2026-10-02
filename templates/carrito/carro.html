@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Carrito de Compras{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="fw-bold text-dark mb-4">
+        <i class="fa-solid fa-cart-shopping me-2 text-purple" style="color: #6f42c1;"></i>Mi Carrito de Compras
+    </h2>
+
+    {% if items_carro %}
+    <div class="row g-4">
+        <!-- TABLA DE DETALLES DEL CARRITO -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Concierto / Sector</th>
+                                <th class="text-center">Precio</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-center">Subtotal</th>
+                                <th class="text-center">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items_carro %}
+                            <tr>
+                                <td>
+                                    <strong class="d-block text-dark">{{ item.evento_titulo }}</strong>
+                                    <span class="badge bg-secondary">{{ item.nombre_sector }}</span>
+                                </td>
+                                <td class="text-center">${{ item.precio|floatformat:0 }}</td>
+                                <td class="text-center">
+                                    <span class="fw-bold fs-6">{{ item.cantidad }}</span>
+                                </td>
+                                <td class="text-center fw-bold text-dark">${{ item.subtotal|floatformat:0 }}</td>
+                                <td class="text-center">
+                                    <a href="{% url 'carrito_web:eliminar_item' item.sector_id %}" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESUMEN DE LA COMPRA Y PROCESAR PAGO -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 p-4">
+                <h5 class="fw-bold text-dark mb-3">Resumen de Compra</h5>
+                
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Total Entradas:</span>
+                    <strong class="text-dark">
+                        {% for item in items_carro %}
+                            {{ item.cantidad }}{% if not forloop.last %} + {% endif %}
+                        {% endfor %}
+                    </strong>
+                </div>
+
+                <hr>
+
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="fs-5 fw-bold text-dark">Total a Pagar:</span>
+                    <span class="fs-4 fw-bold text-success">${{ total_compra|floatformat:0 }}</span>
+                </div>
+
+                <form action="{% url 'compras_web:pagar' %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn w-100 fw-bold text-white py-2 shadow-sm" style="background-color: #6f42c1; border: none;">
+                        <i class="fa-solid fa-credit-card me-2"></i>Pagar y Finalizar Compra
+                    </button>
+                </form>
+
+                <a href="{% url 'eventos_web:index' %}" class="btn btn-link text-decoration-none text-muted w-100 text-center mt-2 small">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Seguir viendo conciertos
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- CARRITO VACÍO -->
+    <div class="text-center py-5">
+        <div class="mb-3 text-muted">
+            <i class="fa-solid fa-cart-arrow-down fa-4x"></i>
+        </div>
+        <h4 class="fw-bold text-secondary">Tu carrito está vacío.</h4>
+        <p class="text-muted mb-4">Explora nuestro catálogo para seleccionar las mejores localidades.</p>
+        <a href="{% url 'eventos_web:index' %}" class="btn text-white fw-bold px-4 py-2" style="background-color: #6f42c1; border: none;">
+            Explorar Conciertos
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

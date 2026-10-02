@@ -1,0 +1,83 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Inicio | Panel Administrativo{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">Panel de Administración</h2>
+        <p class="text-secondary mb-0">Gestiona las entradas y el evento desde un solo lugar.</p>
+    </div>
+</div>
+
+<!-- TARJETAS -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3 border-start border-primary border-4">
+            <small class="text-muted fw-bold text-uppercase">Entradas Disponibles</small>
+            <h3 class="fw-bold text-dark my-1">{{ entradas_disponibles }}</h3>
+            <small class="text-success"><i class="fa-solid fa-circle-check me-1"></i>En inventario</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3 border-start border-info border-4">
+            <small class="text-muted fw-bold text-uppercase">Entradas Vendidas</small>
+            <h3 class="fw-bold text-dark my-1">{{ entradas_vendidas }}</h3>
+            <small class="text-info"><i class="fa-solid fa-ticket me-1"></i>Emitidas</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3 border-start border-success border-4">
+            <small class="text-muted fw-bold text-uppercase">Ventas Totales</small>
+            <h3 class="fw-bold text-dark my-1">${{ ventas_totales|floatformat:0 }}</h3>
+            <small class="text-success"><i class="fa-solid fa-money-bill-wave me-1"></i>Ingresos acumulados</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3 border-start border-warning border-4">
+            <small class="text-muted fw-bold text-uppercase">Órdenes Pendientes</small>
+            <h3 class="fw-bold text-dark my-1">{{ ordenes_pendientes }}</h3>
+            <small class="text-warning"><i class="fa-solid fa-clock me-1"></i>Por procesar</small>
+        </div>
+    </div>
+</div>
+
+<!-- TABLA -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white py-3">
+        <h5 class="fw-bold text-dark mb-0">Últimas Ventas</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Cliente</th>
+                    <th>Sector</th>
+                    <th>Cantidad</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for orden in ultimas_ventas %}
+                <tr>
+                    <td><strong>{{ orden.usuario.get_full_name|default:orden.usuario.username }}</strong></td>
+                    <td>{{ orden.detalles.first.sector.nombre_sector }}</td>
+                    <td>{{ orden.detalles.first.cantidad }}</td>
+                    <td>${{ orden.total|floatformat:0 }}</td>
+                    <td>
+                        <span class="badge {% if orden.estado == 'PAGADA' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                            {{ orden.estado }}
+                        </span>
+                    </td>
+                    <td>{{ orden.fecha_orden|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center py-4 text-muted">No se registran ventas recientes.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

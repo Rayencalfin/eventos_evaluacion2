@@ -1,0 +1,35 @@
+{% extends 'admin_panel/base_admin.html' %}
+
+{% block title %}Nuevo Sector | Panel Administrativo{% endblock %}
+
+{% block admin_content %}
+<div class="mb-4">
+    <h2 class="fw-bold text-dark mb-1">Agregar Sector a {{ evento.titulo }}</h2>
+    <p class="text-secondary mb-0">Define el nombre, precio y cantidad de tickets para este concierto.</p>
+</div>
+
+<div class="card border-0 shadow-sm p-4" style="max-width: 600px;">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label fw-bold">Nombre del Sector</label>
+            <input type="text" name="nombre_sector" class="form-control" placeholder="Ej: VIP, Cancha, Platinum" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Precio ($)</label>
+            <input type="number" name="precio" class="form-control" placeholder="Ej: 120000" required min="0">
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label fw-bold">Stock Inicial (Tickets)</label>
+            <input type="number" name="stock_total" class="form-control" placeholder="Ej: 500" required min="1">
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="{% url 'eventos_web:admin_inventario' %}?evento_id={{ evento.id }}" class="btn btn-light">Cancelar</a>
+            <button type="submit" class="btn btn-primary fw-bold" style="background-color: #6f42c1; border: none;">Guardar Sector</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

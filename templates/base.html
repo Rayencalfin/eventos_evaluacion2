@@ -40,6 +40,11 @@
                             <a class="nav-link text-warning" href="{% url 'swagger-ui' %}">
                                 <i class="fa-solid fa-code me-1"></i>Documentación API
                             </a>
+                            <li class="nav-item ms-2">
+    <a class="btn btn-purple text-white fw-bold btn-sm shadow-sm" href="{% url 'eventos_web:admin_inicio' %}">
+        <i class="fa-solid fa-gauge-high me-1"></i> Panel Admin
+    </a>
+</li>
                         </li>
                         {% endif %}
                     {% endif %}

@@ -46,6 +46,6 @@ class SectorViewSet(viewsets.ModelViewSet):
     serializer_class = SectorSerializer
     permission_classes = [IsOrganizadorOrReadOnly]
 
+
 def error_404_view(request, exception=None):
-    """Vista personalizada para el manejo de rutas no encontradas (404)."""
     return render(request, '404.html', status=404)

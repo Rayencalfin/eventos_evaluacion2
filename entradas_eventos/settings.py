@@ -31,13 +31,9 @@ if not SECRET_KEY:
     else:
         raise ValueError('La variable de entorno SECRET_KEY no está configurada para producción.')
 
-DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+DEBUG = False
 
-ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
-    if host.strip()
-]
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # ==============================================================================
 # REGISTRO DE APLICACIONES (INSTALLED_APPS)

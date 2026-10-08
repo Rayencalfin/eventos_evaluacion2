@@ -219,14 +219,14 @@ def admin_ventas(request):
 
 @login_required
 def admin_clientes(request):
-    """Lista los usuarios espectadores registrados desde la base de datos."""
-    if hasattr(User, 'rol'):
-        clientes = User.objects.filter(rol='Espectador')
-    else:
-        clientes = User.objects.filter(is_staff=False)
+    """Lista todos los usuarios registrados en la plataforma."""
+    # Obtenemos todos los usuarios para asegurarnos de que la lista no quede vacía
+    clientes = User.objects.all().order_by('-date_joined')
     
-    return render(request, 'admin_panel/clientes.html', {'clientes': clientes, 'usuarios': clientes})
-
+    return render(request, 'admin_panel/clientes.html', {
+        'clientes': clientes, 
+        'usuarios': clientes
+    })
 
 @login_required
 def admin_entradas(request):

@@ -37,7 +37,7 @@
                                 </td>
                                 <td class="text-center fw-bold text-dark">${{ item.subtotal|floatformat:0 }}</td>
                                 <td class="text-center">
-                                    <a href="{% url 'carrito_web:eliminar_item' item.sector_id %}" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                    <a href="{% url 'carrito_web:eliminar_carro' item.sector_id %}" class="btn btn-sm btn-outline-danger" title="Eliminar">
                                         <i class="fa-solid fa-trash-can"></i>
                                     </a>
                                 </td>
@@ -55,7 +55,7 @@
                 <h5 class="fw-bold text-dark mb-3">Resumen de Compra</h5>
                 
                 <div class="d-flex justify-content-between mb-2">
-                    <span class="text-muted">Total Entradas:</span>
+                    <span class="text-muted">Desglose de Entradas:</span>
                     <strong class="text-dark">
                         {% for item in items_carro %}
                             {{ item.cantidad }}{% if not forloop.last %} + {% endif %}

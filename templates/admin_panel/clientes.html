@@ -1,14 +1,12 @@
 {% extends 'admin_panel/base_admin.html' %}
 
-{% block title %}Clientes y Usuarios | Admin{% endblock %}
-
-{% block content %}
-<div class="container-fluid py-3">
-    <!-- ENCABEZADO Y ACCIONES DE CLIENTES -->
+{% block admin_content %}
+<div class="container-fluid py-3 text-dark">
+    <!-- ENCABEZADO -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-1"><i class="fa-solid fa-users me-2 text-purple"></i>Clientes Registrados</h2>
-            <p class="text-muted mb-0">Listado de usuarios espectadores registrados en la plataforma.</p>
+            <p class="text-muted mb-0">Listado de usuarios registrados en la plataforma.</p>
         </div>
         <div>
             <a href="{% url 'eventos_web:admin_inicio' %}" class="btn btn-outline-dark fw-bold">
@@ -17,16 +15,7 @@
         </div>
     </div>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-
-    <!-- TABLA DE CLIENTES DENTRO DEL PANEL ADMIN -->
+    <!-- TABLA DE CLIENTES -->
     <div class="card border-0 shadow-sm rounded-3 overflow-hidden mb-4">
         <div class="card-body p-0">
             <div class="table-responsive">

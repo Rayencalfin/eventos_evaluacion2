@@ -1,6 +1,9 @@
 """
 ==============================================================================
-MÓDULO: CARRITO DE COMPRAS - VISTAS WEB
+MÓDULO: CARRITO DE COMPRAS - VISTAS WEB (PERSISTENCIA TOTAL EN BD)
+==============================================================================
+Garantiza la persistencia del carro en PostgreSQL asociado al usuario.
+Soporta logout, cierre de navegador y reconexiones sin perder ítems.
 ==============================================================================
 """
 
@@ -9,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from functools import wraps
 from eventos.models import Sector
+from .models import Carro, ItemCarro
 
 
 def espectador_required(view_func):
@@ -23,7 +27,7 @@ def espectador_required(view_func):
 
 @login_required
 def agregar_carro_web(request, sector_id):
-    """Agrega tickets al carrito guardando la información en la sesión."""
+    """Agrega tickets al carrito guardando la información en la Base de Datos."""
     if request.method == 'POST':
         sector = get_object_or_404(Sector.objects.select_related('evento'), id=sector_id)
         
@@ -41,11 +45,12 @@ def agregar_carro_web(request, sector_id):
             messages.error(request, f"No hay suficiente stock. Quedan {sector.stock_disponible} entradas.")
             return redirect('eventos_web:detalle_evento', evento_id=sector.evento.id)
 
-        # Obtener o inicializar el carrito en la sesión
-        carrito = request.session.get('carrito', {})
-        sector_key = str(sector.id)
+        # 1. Obtener o crear el Carro persistente vinculado al Usuario en la BD
+        carro_usuario, _ = Carro.objects.get_or_create(usuario=request.user)
 
-        cantidad_actual = carrito.get(sector_key, {}).get('cantidad', 0)
+        # 2. Verificar si el sector ya existe en el carro del usuario
+        item_existente = ItemCarro.objects.filter(carro=carro_usuario, sector=sector).first()
+        cantidad_actual = item_existente.cantidad if item_existente else 0
         nueva_cantidad = cantidad_actual + cantidad
 
         if nueva_cantidad > sector.stock_disponible:
@@ -56,19 +61,16 @@ def agregar_carro_web(request, sector_id):
             )
             return redirect('eventos_web:detalle_evento', evento_id=sector.evento.id)
 
-        # Guardar ítem detallado
-        carrito[sector_key] = {
-            'sector_id': sector.id,
-            'nombre_sector': sector.nombre_sector,
-            'evento_titulo': sector.evento.titulo,
-            'evento_id': sector.evento.id,
-            'precio': float(sector.precio),
-            'cantidad': nueva_cantidad,
-            'subtotal': float(sector.precio) * nueva_cantidad
-        }
-
-        request.session['carrito'] = carrito
-        request.session.modified = True
+        # 3. Guardar o actualizar en la Base de Datos
+        if item_existente:
+            item_existente.cantidad = nueva_cantidad
+            item_existente.save()
+        else:
+            ItemCarro.objects.create(
+                carro=carro_usuario,
+                sector=sector,
+                cantidad=cantidad
+            )
 
         messages.success(request, f"Se agregaron {cantidad} entrada(s) de '{sector.nombre_sector}' a tu carrito.")
         return redirect('carrito_web:ver_carro')
@@ -78,10 +80,30 @@ def agregar_carro_web(request, sector_id):
 
 @login_required
 def ver_carro_web(request):
-    """Renderiza el carrito con los ítems activos en la sesión."""
-    carrito = request.session.get('carrito', {})
-    items = list(carrito.values())
-    total_compra = sum(item['subtotal'] for item in items)
+    """Renderiza el carrito trayendo los ítems activos desde PostgreSQL."""
+    # Obtener o crear el carro en BD
+    carro_usuario, _ = Carro.objects.get_or_create(usuario=request.user)
+    
+    # Consultar los items asociados con sus relaciones pre-cargadas
+    db_items = ItemCarro.objects.filter(carro=carro_usuario).select_related('sector', 'sector__evento')
+
+    # Mapear a una lista con llaves compatibles para la plantilla
+    items = []
+    total_compra = 0
+
+    for item in db_items:
+        subtotal = float(item.sector.precio) * item.cantidad
+        total_compra += subtotal
+        items.append({
+            'id': item.id,
+            'sector_id': item.sector.id,
+            'nombre_sector': item.sector.nombre_sector,
+            'evento_titulo': item.sector.evento.titulo,
+            'evento_id': item.sector.evento.id,
+            'precio': float(item.sector.precio),
+            'cantidad': item.cantidad,
+            'subtotal': subtotal
+        })
 
     context = {
         'items_carro': items,
@@ -94,14 +116,12 @@ def ver_carro_web(request):
 
 @login_required
 def eliminar_carro_web(request, sector_id):
-    """Elimina un producto del carrito."""
-    carrito = request.session.get('carrito', {})
-    sector_key = str(sector_id)
+    """Elimina un producto del carrito en la Base de Datos."""
+    carro_usuario = Carro.objects.filter(usuario=request.user).first()
 
-    if sector_key in carrito:
-        del carrito[sector_key]
-        request.session['carrito'] = carrito
-        request.session.modified = True
+    if carro_usuario:
+        # Permite eliminar buscando tanto por ID del sector como por ID del item
+        ItemCarro.objects.filter(carro=carro_usuario, sector_id=sector_id).delete()
         messages.info(request, "Entrada removida del carrito.")
 
     return redirect('carrito_web:ver_carro')

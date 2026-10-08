@@ -142,4 +142,3 @@ class Entrada(models.Model):
 
     def __str__(self):
         return f"Ticket {self.uuid} - {self.sector.nombre_sector}"
-    

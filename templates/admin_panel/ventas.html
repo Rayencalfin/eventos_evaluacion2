@@ -20,6 +20,7 @@
                     <th>Fecha</th>
                     <th>Total</th>
                     <th>Estado</th>
+                    <th class="text-end pe-4">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -34,10 +35,22 @@
                             {{ orden.estado }}
                         </span>
                     </td>
+                    <td class="text-end pe-4">
+                        {% if orden.estado != 'CANCELADA' %}
+                            <form action="{% url 'compras_web:cancelar_orden' orden.id %}" method="POST" class="d-inline" onsubmit="return confirm('¿Seguro que deseas cancelar esta orden? El stock de entradas se reincorporará automáticamente.');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">
+                                    <i class="fa-solid fa-ban me-1"></i>Cancelar Orden
+                                </button>
+                            </form>
+                        {% else %}
+                            <span class="text-muted small">Sin acciones</span>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="text-center py-4 text-muted">No se registran órdenes en la plataforma.</td>
+                    <td colspan="6" class="text-center py-4 text-muted">No se registran órdenes en la plataforma.</td>
                 </tr>
                 {% endfor %}
             </tbody>

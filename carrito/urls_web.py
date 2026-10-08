@@ -14,5 +14,5 @@ app_name = 'carrito_web'
 urlpatterns = [
     path('carro/', ver_carro_web, name='ver_carro'),
     path('carro/agregar/<int:sector_id>/', agregar_carro_web, name='agregar_item'),
-    path('carro/eliminar/<int:sector_id>/', eliminar_carro_web, name='eliminar_item'),
+    path('carro/eliminar/<int:sector_id>/', eliminar_carro_web, name='eliminar_carro'),
 ]

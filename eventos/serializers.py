@@ -17,7 +17,7 @@ class ArtistaSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Artista
-        fields = ['id', 'nombre', 'genero', 'biografia', 'imagen']
+        fields = '__all__'
 
 
 class RecintoSerializer(serializers.ModelSerializer):
@@ -26,7 +26,8 @@ class RecintoSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Recinto
-        fields = ['id', 'nombre', 'direccion', 'ciudad', 'capacidad_maxima']
+        fields = '__all__'
+
 
 
 class SectorSerializer(serializers.ModelSerializer):
@@ -35,7 +36,7 @@ class SectorSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Sector
-        fields = ['id', 'evento', 'nombre_sector', 'precio', 'stock_total', 'stock_disponible']
+        fields = '__all__'
         read_only_fields = ['id']
 
 

@@ -31,7 +31,7 @@ if not SECRET_KEY:
     else:
         raise ValueError('La variable de entorno SECRET_KEY no está configurada para producción.')
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
@@ -169,15 +169,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CONFIGURACIÓN DE DJANGO REST FRAMEWORK Y JWT (SIMPLE_JWT)
 # ==============================================================================
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',  # Permite autenticación web (cookies/login HTML)
-        'rest_framework_simplejwt.authentication.JWTAuthentication', # Permite autenticación API REST con Token JWT
-        'django.contrib.auth.backends.ModelBackend',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        'rest_framework.permissions.AllowAny',
     ),
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
@@ -204,16 +202,17 @@ SIMPLE_JWT = {
 # ==============================================================================
 SPECTACULAR_SETTINGS = {
     'TITLE': 'API Plataforma de Venta de Entradas - Conciertos & Eventos',
-    'DESCRIPTION': (
-        'Sistema API-First para comercialización de tickets de conciertos (Caso Stray Kids). '
-        'Soporta autenticación JWT con roles Espectador/Organizador, carrito persistente '
-        'y transacciones ACID para compra de entradas con UUID único.'
-    ),
+    'DESCRIPTION': 'Sistema API-First para comercialización de tickets de conciertos.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_PATCH': True,
     'COMPONENT_SPLIT_REQUEST': True,
-    'SERVE_PERMISSIONS': ['api.permissions.IsOrganizador'],
+    'SERVE_PERMISSIONS': [],
+    # Mapeo explicito para evitar el choque con ModelBackend de Django
+    'AUTHENTICATION_WHITELIST': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
         'persistAuthorization': True,
